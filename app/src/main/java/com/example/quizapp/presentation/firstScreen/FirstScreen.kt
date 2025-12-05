@@ -30,13 +30,13 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.navigation.NavHostController
 import com.example.quizapp.R
 import com.example.quizapp.presentation.utils.ColorPalette
 import com.example.quizapp.ui.theme.Lexend
 
-@Preview
 @Composable
-fun FirstScreen() {
+fun FirstScreen(controller: NavHostController) {
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -46,7 +46,7 @@ fun FirstScreen() {
 
         Spacer(modifier = Modifier.height(30.dp))
 
-        QuizColumn()
+        QuizColumn(controller)
     }
 }
 
@@ -82,7 +82,7 @@ fun WelcomeBar() {
 
 
 @Composable
-fun QuizColumn() {
+fun QuizColumn(controller: NavHostController) {
     Column(
         modifier = Modifier.fillMaxSize(),
         horizontalAlignment = Alignment.CenterHorizontally
@@ -119,7 +119,7 @@ fun QuizColumn() {
                     containerColor = ColorPalette.primaryGreen
                 ),
                 onClick = {
-
+                    controller.navigate("secondScreen")
                 },
                 shape = RoundedCornerShape(8.dp)
             ) {
@@ -171,7 +171,7 @@ fun QuizColumn() {
                     containerColor = ColorPalette.blueButton
                 ),
                 onClick = {
-
+                    controller.navigate("thirdScreen")
                 },
                 shape = RoundedCornerShape(8.dp)
             ) {
