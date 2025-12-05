@@ -1,12 +1,10 @@
 package com.example.quizapp.presentation.firstScreen
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -25,13 +23,12 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
 import com.example.quizapp.R
+import com.example.quizapp.presentation.NavigationItem
 import com.example.quizapp.presentation.utils.ColorPalette
 import com.example.quizapp.ui.theme.Lexend
 
@@ -119,7 +116,7 @@ fun QuizColumn(controller: NavHostController) {
                     containerColor = ColorPalette.primaryGreen
                 ),
                 onClick = {
-                    controller.navigate("secondScreen")
+                    controller.navigate(NavigationItem.QUIZZES.route)
                 },
                 shape = RoundedCornerShape(8.dp)
             ) {
@@ -171,7 +168,9 @@ fun QuizColumn(controller: NavHostController) {
                     containerColor = ColorPalette.blueButton
                 ),
                 onClick = {
-                    controller.navigate("thirdScreen")
+                    controller.navigate(
+                        NavigationItem.CREATE_QUIZ.route
+                    )
                 },
                 shape = RoundedCornerShape(8.dp)
             ) {

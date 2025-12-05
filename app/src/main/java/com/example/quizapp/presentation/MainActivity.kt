@@ -31,6 +31,7 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.example.quizapp.presentation.createQuiz.CreateQuizScreen
 import com.example.quizapp.presentation.firstScreen.FirstScreen
+import com.example.quizapp.presentation.myQuizzes.MyQuizzesScreen
 import com.example.quizapp.presentation.quizzes.QuizzesScreen
 import com.example.quizapp.presentation.utils.ColorPalette
 import com.example.quizapp.ui.theme.QuizAppTheme
@@ -49,8 +50,8 @@ class MainActivity : ComponentActivity() {
                 Scaffold(
                     bottomBar = {
                         val showBottomBar = currentRoute in listOf(
-                            "firstScreen",
-                            "secondScreen"
+                            NavigationItem.HOME.route,
+                            NavigationItem.ALL_QUIZZES.route
                         )
                         if (showBottomBar){
                             BottomNavigation(navController)
@@ -59,18 +60,22 @@ class MainActivity : ComponentActivity() {
                 ) {
                     NavHost(
                         modifier = Modifier.padding(it),
-                        navController = navController, startDestination = "firstScreen"
+                        navController = navController, startDestination = NavigationItem.HOME.route
                     ) {
-                        composable(route = "firstScreen") {
+                        composable(route = NavigationItem.HOME.route) {
                             FirstScreen(navController)
                         }
 
-                        composable(route = "secondScreen") {
+                        composable(NavigationItem.ALL_QUIZZES.route) {
                             QuizzesScreen()
                         }
 
-                        composable(route = "thirdScreen") {
+                        composable(route = NavigationItem.CREATE_QUIZ.route) {
                             CreateQuizScreen(navController)
+                        }
+
+                        composable(route = NavigationItem.QUIZZES.route) {
+                            MyQuizzesScreen(navController)
                         }
 
 
@@ -111,11 +116,14 @@ fun BottomNavigation(controller: NavHostController) {
                         controller.navigate(it.route)
                     },
                     icon = {
-                        Icon(
-                            modifier = Modifier.size(24.dp),
-                            painter = painterResource(it.icon),
-                            contentDescription = it.title,
-                        )
+                        it.icon?.let { icon ->
+                            Icon(
+                                modifier = Modifier.size(24.dp),
+                                painter = painterResource(icon),
+                                contentDescription = it.title,
+                            )
+                        }
+
                     },
                     label = {
                         Text(text = it.title)
