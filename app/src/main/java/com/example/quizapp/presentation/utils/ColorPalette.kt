@@ -7,5 +7,11 @@ object ColorPalette{
     val bgDark = Color(0XFF102219)
     val bgIcon = Color(0XFF245B40)
     val bgInitialCards = Color(0XFF283830)
+    val bgQuizCards = Color(0XFF1C2D24)
     val blueButton = Color(0XFF364659)
+    val greenButton = Color(0XFF1A5336)
+
+    val borderTextField = Color(0XFF354C40)
+    val bgTextField = Color(0XFF1C2721)
+    val bgTextField2 = Color(0XFF102219)
 }
