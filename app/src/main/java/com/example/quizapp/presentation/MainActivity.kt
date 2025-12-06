@@ -22,6 +22,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
@@ -41,6 +42,7 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContent {
+            val context = LocalContext.current
             val navController = rememberNavController()
             val navBackStackEntry by navController.currentBackStackEntryAsState()
             val currentRoute = navBackStackEntry?.destination?.route
@@ -71,7 +73,8 @@ class MainActivity : ComponentActivity() {
                         }
 
                         composable(route = NavigationItem.CREATE_QUIZ.route) {
-                            CreateQuizScreen(navController)
+                            CreateQuizScreen(controller = navController,
+                                mainContext = context)
                         }
 
                         composable(route = NavigationItem.QUIZZES.route) {

@@ -19,6 +19,7 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -26,19 +27,25 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavHostController
 import com.example.quizapp.R
 import com.example.quizapp.presentation.NavigationItem
+import com.example.quizapp.presentation.classes.QuizModel
 import com.example.quizapp.presentation.utils.ColorPalette
 import com.example.quizapp.ui.theme.Lexend
+import org.koin.androidx.compose.koinViewModel
 
 @Composable
-fun FirstScreen(controller: NavHostController) {
+fun FirstScreen(
+    controller: NavHostController,
+) {
     Column(
         modifier = Modifier
             .fillMaxSize()
             .background(ColorPalette.bgDark)
     ) {
+
         WelcomeBar()
 
         Spacer(modifier = Modifier.height(30.dp))

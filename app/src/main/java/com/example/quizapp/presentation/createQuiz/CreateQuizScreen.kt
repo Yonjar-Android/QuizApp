@@ -1,5 +1,7 @@
 package com.example.quizapp.presentation.createQuiz
 
+import android.content.Context
+import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
@@ -14,6 +16,8 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.FloatingActionButton
@@ -27,7 +31,7 @@ import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -38,17 +42,39 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavHostController
 import com.example.quizapp.R
+import com.example.quizapp.data.database.entities.QuizEntity
+import com.example.quizapp.presentation.classes.OptionModel
+import com.example.quizapp.presentation.classes.QuestionModel
 import com.example.quizapp.presentation.utils.ColorPalette
 import com.example.quizapp.ui.theme.Lexend
+import org.koin.androidx.compose.koinViewModel
 
 @Composable
-fun CreateQuizScreen(controller: NavHostController) {
+fun CreateQuizScreen(
+    mainContext: Context,
+    controller: NavHostController,
+    viewModel: CreateQuizViewModel = koinViewModel()
+) {
 
     var title by remember { mutableStateOf("") }
 
-    var questions by remember { mutableIntStateOf(1) }
+    var category by remember { mutableStateOf("") }
+
+    val message by viewModel.message.collectAsStateWithLifecycle()
+
+    var questions = remember { mutableStateListOf<QuestionModel>() }
+
+    if (message.isNotEmpty()) {
+        Toast.makeText(mainContext, message, Toast.LENGTH_SHORT).show()
+
+        if (message == "Quiz created successfully") {
+            viewModel.resetMessage()
+            controller.navigateUp()
+        }
+    }
 
     Box(modifier = Modifier.fillMaxSize()) {
 
@@ -61,7 +87,17 @@ fun CreateQuizScreen(controller: NavHostController) {
             Column(
                 modifier = Modifier.fillMaxWidth(fraction = 0.94f),
             ) {
-                TopBarIcons(controller)
+                TopBarIcons(
+                    controller,
+                    createQuiz = {
+                        viewModel.createQuiz(
+                            QuizEntity(
+                                title = title,
+                                category = category
+                            ),
+                            questions
+                        )
+                    })
 
                 Spacer(modifier = Modifier.height(10.dp))
 
@@ -103,6 +139,46 @@ fun CreateQuizScreen(controller: NavHostController) {
                     )
                 )
 
+                Spacer(modifier = Modifier.height(10.dp))
+
+                Text(
+                    "Category", color = Color.White,
+                    fontFamily = Lexend,
+                    fontWeight = FontWeight.SemiBold
+                )
+
+                Spacer(modifier = Modifier.height(5.dp))
+
+                TextField(
+                    shape = RoundedCornerShape(8.dp),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .border(
+                            1.dp,
+                            color = ColorPalette.borderTextField,
+                            RoundedCornerShape(8.dp)
+                        ),
+
+                    value = category, onValueChange = { category = it },
+                    placeholder = {
+                        Text(
+                            "Enter a category for your quiz",
+                            fontFamily = Lexend,
+                            fontWeight = FontWeight.Bold,
+                            color = Color.Gray
+                        )
+                    },
+                    colors = TextFieldDefaults.colors(
+                        focusedContainerColor = ColorPalette.bgTextField2,
+                        unfocusedContainerColor = ColorPalette.bgTextField2,
+                        focusedIndicatorColor = Color.Transparent,
+                        unfocusedIndicatorColor = Color.Transparent,
+                        focusedTextColor = Color.White,
+                        unfocusedTextColor = Color.White,
+                        cursorColor = ColorPalette.primaryGreen
+                    )
+                )
+
                 Spacer(modifier = Modifier.height(30.dp))
 
                 Text(
@@ -114,12 +190,42 @@ fun CreateQuizScreen(controller: NavHostController) {
 
                 Spacer(modifier = Modifier.height(15.dp))
 
-                LazyColumn() {
-                    items(questions) {
-                        QuestionItem()
-                        Spacer(modifier = Modifier.height(15.dp))
+                LazyColumn {
+                    itemsIndexed(questions) { i, q ->
+
+                        QuestionItem(
+                            questionInfo = q,
+
+                            onQuestionChanged = { newText ->
+                                questions[i] = questions[i].copy(question = newText)
+                            },
+
+                            onOptionSelected = { optionIndex ->
+                                questions[i] = questions[i].copy(
+                                    options = q.options.mapIndexed { idx, opt ->
+                                        opt.copy(isCorrect = idx == optionIndex)
+                                    }
+                                )
+                            },
+
+                            onOptionChanged = { optionIndex, newText ->
+                                questions[i] = questions[i].copy(
+                                    options = q.options.mapIndexed { idx, opt ->
+                                        if (idx == optionIndex) opt.copy(answer = newText)
+                                        else opt
+                                    }
+                                )
+                            },
+
+                            onDelete = {
+                                questions.removeAt(i)
+                            }
+                        )
+
+                        Spacer(Modifier.height(15.dp))
                     }
                 }
+
             }
         }
 
@@ -131,7 +237,39 @@ fun CreateQuizScreen(controller: NavHostController) {
             shape = CircleShape,
             onClick = {
                 // Add a question
-                questions+=1
+                questions.add(
+                    QuestionModel(
+                        id = 0,
+                        idQuiz = 0,
+                        question = "",
+                        options = listOf(
+                            OptionModel(
+                                id = 0,
+                                idQuestion = 0,
+                                answer = "",
+                                isCorrect = true
+                            ),
+                            OptionModel(
+                                id = 0,
+                                idQuestion = 0,
+                                answer = "",
+                                isCorrect = false
+                            ),
+                            OptionModel(
+                                id = 0,
+                                idQuestion = 0,
+                                answer = "",
+                                isCorrect = false
+                            ),
+                            OptionModel(
+                                id = 0,
+                                idQuestion = 0,
+                                answer = "",
+                                isCorrect = false
+                            )
+                        )
+                    )
+                )
             }
         ) {
             Icon(
@@ -145,7 +283,10 @@ fun CreateQuizScreen(controller: NavHostController) {
 }
 
 @Composable
-fun TopBarIcons(controller: NavHostController) {
+fun TopBarIcons(
+    controller: NavHostController,
+    createQuiz: () -> Unit
+) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -172,7 +313,9 @@ fun TopBarIcons(controller: NavHostController) {
         )
 
         TextButton(
-            onClick = {}
+            onClick = {
+                createQuiz.invoke()
+            }
         ) {
             Text(
                 "Save", color = ColorPalette.primaryGreen, fontWeight = FontWeight.Bold,
@@ -183,9 +326,13 @@ fun TopBarIcons(controller: NavHostController) {
 }
 
 @Composable
-fun QuestionItem() {
-
-    var question by remember { mutableStateOf("") }
+fun QuestionItem(
+    questionInfo: QuestionModel,
+    onQuestionChanged: (String) -> Unit,
+    onOptionSelected: (Int) -> Unit,
+    onOptionChanged: (Int, String) -> Unit,
+    onDelete: () -> Unit
+) {
 
     Column(
         modifier = Modifier
@@ -196,6 +343,7 @@ fun QuestionItem() {
             )
             .padding(16.dp)
     ) {
+
         Row(
             modifier = Modifier
                 .fillMaxWidth()
@@ -203,8 +351,10 @@ fun QuestionItem() {
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
+
             Text(
-                "Question 1", color = Color.White,
+                "Question",
+                color = Color.White,
                 fontFamily = Lexend,
                 fontWeight = FontWeight.SemiBold,
                 fontSize = 18.sp
@@ -212,14 +362,12 @@ fun QuestionItem() {
 
             IconButton(
                 modifier = Modifier.size(22.dp),
-                onClick = {
-
-                }) {
+                onClick = onDelete
+            ) {
                 Icon(
-                    modifier = Modifier,
                     painter = painterResource(R.drawable.delete),
                     contentDescription = "Delete Icon",
-                    tint = Color.White,
+                    tint = Color.White
                 )
             }
         }
@@ -236,7 +384,8 @@ fun QuestionItem() {
                     RoundedCornerShape(8.dp)
                 ),
 
-            value = question, onValueChange = { question = it },
+            value = questionInfo.question,
+            onValueChange = onQuestionChanged,
             placeholder = {
                 Text(
                     "Enter a title for your quiz",
@@ -258,58 +407,39 @@ fun QuestionItem() {
 
         Spacer(Modifier.height(10.dp))
 
-        var selectedRadioButton by remember { mutableStateOf(0) }
-
-        AnswerItem(
-            selected = selectedRadioButton == 0,
-            onSelected = {
-                selectedRadioButton = 0
-            }
-        )
-        AnswerItem(
-            selected = selectedRadioButton == 1,
-            onSelected = {
-                selectedRadioButton = 1
-            }
-        )
-        AnswerItem(
-            selected = selectedRadioButton == 2,
-            onSelected = {
-                selectedRadioButton = 2
-            }
-
-        )
-        AnswerItem(
-            selected = selectedRadioButton == 3,
-            onSelected = {
-                selectedRadioButton = 3
-            }
-        )
-
+        questionInfo.options.forEachIndexed { index, option ->
+            AnswerItem(
+                answerInfo = option,
+                selected = option.isCorrect,
+                onSelected = { onOptionSelected(index) },
+                onAnswerChanged = { text -> onOptionChanged(index, text) }
+            )
+        }
     }
 }
 
 
 @Composable
 fun AnswerItem(
+    answerInfo: OptionModel,
     selected: Boolean,
-    onSelected: () -> Unit
+    onSelected: () -> Unit,
+    onAnswerChanged: (String) -> Unit
 ) {
 
-    var answer by remember { mutableStateOf("") }
-
-    val colorSelected = if (selected) ColorPalette.primaryGreen else ColorPalette.borderTextField
+    val colorSelected =
+        if (selected) ColorPalette.primaryGreen
+        else ColorPalette.borderTextField
 
     Row(
         modifier = Modifier.fillMaxWidth(),
         verticalAlignment = Alignment.CenterVertically
     ) {
+
         RadioButton(
             modifier = Modifier.weight(1f),
             selected = selected,
-            onClick = {
-                onSelected()
-            },
+            onClick = onSelected,
             colors = RadioButtonDefaults.colors(
                 selectedColor = ColorPalette.primaryGreen,
                 unselectedColor = ColorPalette.borderTextField
@@ -329,15 +459,18 @@ fun AnswerItem(
                     RoundedCornerShape(8.dp)
                 ),
 
-            value = answer, onValueChange = { answer = it },
+            value = answerInfo.answer,
+            onValueChange = onAnswerChanged,
+
             placeholder = {
                 Text(
-                    "Answer Option A",
+                    "Answer",
                     fontFamily = Lexend,
                     fontWeight = FontWeight.Bold,
                     color = Color.Gray
                 )
             },
+
             colors = TextFieldDefaults.colors(
                 focusedContainerColor = ColorPalette.bgTextField2,
                 unfocusedContainerColor = ColorPalette.bgTextField2,

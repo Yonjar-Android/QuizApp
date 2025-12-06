@@ -11,6 +11,8 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
@@ -33,18 +35,24 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavHostController
 import com.example.quizapp.R
 import com.example.quizapp.presentation.NavigationItem
+import com.example.quizapp.presentation.classes.QuizModel
 import com.example.quizapp.presentation.utils.ColorPalette
 import com.example.quizapp.ui.theme.Lexend
+import org.koin.androidx.compose.koinViewModel
 
 @Composable
 fun MyQuizzesScreen(
-    controller: NavHostController
+    controller: NavHostController,
+    viewModel: MyQuizzesViewModel = koinViewModel()
 ) {
 
     var search by remember { mutableStateOf("") }
+
+    val quiz by viewModel.quiz.collectAsStateWithLifecycle()
 
     Box(modifier = Modifier.fillMaxSize()) {
         Column(
@@ -120,9 +128,12 @@ fun MyQuizzesScreen(
 
                 Spacer(modifier = Modifier.height(20.dp))
 
-                repeat(3) {
-                    MyQuizItem()
-                    Spacer(modifier = Modifier.height(20.dp))
+                println(quiz)
+                LazyColumn() {
+                    items(quiz) { quizInfo ->
+                        MyQuizItem(quizInfo)
+                        Spacer(modifier = Modifier.height(20.dp))
+                    }
                 }
             }
         }
@@ -151,7 +162,7 @@ fun MyQuizzesScreen(
 }
 
 @Composable
-fun MyQuizItem() {
+fun MyQuizItem(quiz: QuizModel) {
     Column(
         modifier = Modifier
             .fillMaxWidth()
@@ -167,7 +178,7 @@ fun MyQuizItem() {
                 .fillMaxWidth(fraction = 0.9f)
         ) {
             Text(
-                "World Capitals",
+                quiz.title,
                 color = Color.White,
                 fontFamily = Lexend,
                 fontWeight = FontWeight.Bold
