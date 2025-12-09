@@ -8,6 +8,7 @@ import com.example.quizapp.data.database.daos.QuizDao
 import com.example.quizapp.data.database.entities.OptionEntity
 import com.example.quizapp.data.database.entities.QuestionEntity
 import com.example.quizapp.data.database.entities.QuizEntity
+import com.example.quizapp.data.mappers.toModel
 import com.example.quizapp.presentation.classes.QuestionModel
 import com.example.quizapp.presentation.classes.QuizModel
 import kotlinx.coroutines.flow.Flow
@@ -30,6 +31,19 @@ class QuizRepository(
             }
         }
     }
+
+    suspend fun getQuizById(quizId: Long): QuizModel {
+        val response = quizDao.getQuizWithQuestions(quizId)
+        return QuizModel(
+            id = response.quiz.id,
+            title = response.quiz.title,
+            category = response.quiz.category,
+            questions = response.questions.map {
+                it.toModel()
+            }
+        )
+    }
+
 
     suspend fun createQuiz(
         quizEntity: QuizEntity,

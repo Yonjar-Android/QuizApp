@@ -26,13 +26,16 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
+import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import androidx.navigation.navArgument
 import com.example.quizapp.presentation.createQuiz.CreateQuizScreen
 import com.example.quizapp.presentation.firstScreen.FirstScreen
 import com.example.quizapp.presentation.myQuizzes.MyQuizzesScreen
+import com.example.quizapp.presentation.questionScreen.QuestionScreen
 import com.example.quizapp.presentation.quizzes.QuizzesScreen
 import com.example.quizapp.presentation.utils.ColorPalette
 import com.example.quizapp.ui.theme.QuizAppTheme
@@ -55,7 +58,7 @@ class MainActivity : ComponentActivity() {
                             NavigationItem.HOME.route,
                             NavigationItem.ALL_QUIZZES.route
                         )
-                        if (showBottomBar){
+                        if (showBottomBar) {
                             BottomNavigation(navController)
                         }
                     }
@@ -73,12 +76,28 @@ class MainActivity : ComponentActivity() {
                         }
 
                         composable(route = NavigationItem.CREATE_QUIZ.route) {
-                            CreateQuizScreen(controller = navController,
-                                mainContext = context)
+                            CreateQuizScreen(
+                                controller = navController,
+                                mainContext = context
+                            )
                         }
 
                         composable(route = NavigationItem.QUIZZES.route) {
                             MyQuizzesScreen(navController)
+                        }
+
+                        composable(
+                            route = "${NavigationItem.QUESTION.route}/{quizId}",
+                            arguments = listOf(navArgument("quizId", builder = {
+                                type = NavType.LongType
+                            }))
+                        ) { backStackEntry ->
+                            val quizId = backStackEntry.arguments?.getLong("quizId")
+
+                            QuestionScreen(
+                                quizId = quizId,
+                                controller = navController
+                            )
                         }
 
 

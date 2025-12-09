@@ -128,10 +128,13 @@ fun MyQuizzesScreen(
 
                 Spacer(modifier = Modifier.height(20.dp))
 
-                println(quiz)
                 LazyColumn() {
                     items(quiz) { quizInfo ->
-                        MyQuizItem(quizInfo)
+                        MyQuizItem(
+                            quizInfo,
+                            navigateToQuiz = { quizId ->
+                                controller.navigate("${NavigationItem.QUESTION.route}/$quizId")
+                            })
                         Spacer(modifier = Modifier.height(20.dp))
                     }
                 }
@@ -162,7 +165,10 @@ fun MyQuizzesScreen(
 }
 
 @Composable
-fun MyQuizItem(quiz: QuizModel) {
+fun MyQuizItem(
+    quiz: QuizModel,
+    navigateToQuiz: (Long) -> Unit
+) {
     Column(
         modifier = Modifier
             .fillMaxWidth()
@@ -200,7 +206,9 @@ fun MyQuizItem(quiz: QuizModel) {
                 .padding(bottom = 8.dp)
                 .fillMaxWidth(fraction = 0.9f),
             onClick = {
-
+                navigateToQuiz.invoke(
+                    quiz.id
+                )
             },
             colors = ButtonDefaults.buttonColors(
                 containerColor = ColorPalette.primaryGreen

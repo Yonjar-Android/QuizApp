@@ -123,7 +123,7 @@ fun QuizColumn(controller: NavHostController) {
                     containerColor = ColorPalette.primaryGreen
                 ),
                 onClick = {
-                    controller.navigate(NavigationItem.QUIZZES.route)
+                    controller.navigate(NavigationItem.ALL_QUIZZES.route)
                 },
                 shape = RoundedCornerShape(8.dp)
             ) {

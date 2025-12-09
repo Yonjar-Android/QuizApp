@@ -2,6 +2,7 @@ package com.example.quizapp.data.database.entities
 
 import androidx.room.Entity
 import androidx.room.ForeignKey
+import androidx.room.Index
 import androidx.room.PrimaryKey
 
 @Entity(
@@ -12,8 +13,9 @@ import androidx.room.PrimaryKey
             parentColumns = ["id"],
             childColumns = ["idQuiz"],
             onDelete = ForeignKey.CASCADE
-        )
-    ]
+        ),
+    ],
+    indices = [Index(value = ["idQuiz"])]
 )
 data class QuestionEntity(
     @PrimaryKey(autoGenerate = true) val id: Long = 0,

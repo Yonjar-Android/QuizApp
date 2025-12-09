@@ -13,6 +13,8 @@ enum class NavigationItem(
     PROFILE(title = "Profile", icon = R.drawable.user, route = "profileScreen"),
 
     ALL_QUIZZES(title = "All Quizzes", icon = null, route = "allQuizzesScreen"),
-    CREATE_QUIZ(title = "Create Quiz", icon = null, route = "createQuizScreen")
+    CREATE_QUIZ(title = "Create Quiz", icon = null, route = "createQuizScreen"),
+    QUESTION(title = "Question", icon = null, route = "questionScreen")
+
 
 }

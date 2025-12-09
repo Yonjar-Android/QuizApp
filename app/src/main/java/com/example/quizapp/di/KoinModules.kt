@@ -4,6 +4,7 @@ import com.example.quizapp.data.database.QuizDatabase
 import com.example.quizapp.data.repositories.QuizRepository
 import com.example.quizapp.presentation.createQuiz.CreateQuizViewModel
 import com.example.quizapp.presentation.myQuizzes.MyQuizzesViewModel
+import com.example.quizapp.presentation.questionScreen.QuestionViewModel
 import org.koin.core.module.dsl.viewModel
 import org.koin.dsl.module
 
@@ -45,6 +46,12 @@ val viewModelModule = module{
 
     viewModel {
         MyQuizzesViewModel(
+            quizRepository = get()
+        )
+    }
+
+    viewModel {
+        QuestionViewModel(
             quizRepository = get()
         )
     }
