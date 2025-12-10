@@ -2,6 +2,7 @@ package com.example.quizapp.presentation.myQuizzes
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -17,9 +18,12 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
@@ -30,9 +34,11 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.blur
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -50,9 +56,16 @@ fun MyQuizzesScreen(
     viewModel: MyQuizzesViewModel = koinViewModel()
 ) {
 
-    var search by remember { mutableStateOf("") }
+    val search by viewModel.query.collectAsStateWithLifecycle()
 
-    val quiz by viewModel.quiz.collectAsStateWithLifecycle()
+    val quiz by viewModel.searchResults.collectAsStateWithLifecycle()
+
+    val message by viewModel.message.collectAsStateWithLifecycle()
+
+    var deleteQuiz by remember { mutableStateOf(false) }
+
+    var quizModel by remember { mutableStateOf<QuizModel?>(null) }
+
 
     Box(modifier = Modifier.fillMaxSize()) {
         Column(
@@ -106,7 +119,7 @@ fun MyQuizzesScreen(
                             RoundedCornerShape(8.dp)
                         ),
 
-                    value = search, onValueChange = { search = it },
+                    value = search, onValueChange = { viewModel.onQueryChange(it) },
                     placeholder = {
                         Text(
                             "Search for a quiz",
@@ -134,7 +147,12 @@ fun MyQuizzesScreen(
                             quizInfo,
                             navigateToQuiz = { quizId ->
                                 controller.navigate("${NavigationItem.QUESTION.route}/$quizId")
-                            })
+                            },
+                            showDeleteQuiz = { quizToDelete ->
+                                quizModel = quizToDelete
+                                deleteQuiz = true
+                            }
+                        )
                         Spacer(modifier = Modifier.height(20.dp))
                     }
                 }
@@ -161,14 +179,35 @@ fun MyQuizzesScreen(
                 modifier = Modifier.size(18.dp)
             )
         }
+
+        if (deleteQuiz) {
+            DeleteCard(
+                deleteQuiz = {
+                    if (quizModel != null) {
+                        viewModel.deleteQuiz(quizModel!!)
+                        deleteQuiz = false
+                    } else {
+                        deleteQuiz = false
+                    }
+                },
+                closeCard = {
+                    deleteQuiz = false
+                },
+                quizTitle = quizModel?.title ?: ""
+            )
+        }
     }
 }
 
 @Composable
 fun MyQuizItem(
     quiz: QuizModel,
-    navigateToQuiz: (Long) -> Unit
+    navigateToQuiz: (Long) -> Unit,
+    showDeleteQuiz: (QuizModel) -> Unit = {}
 ) {
+
+    var expanded by remember { mutableStateOf(false) }
+
     Column(
         modifier = Modifier
             .fillMaxWidth()
@@ -183,12 +222,42 @@ fun MyQuizItem(
                 .padding(vertical = 8.dp)
                 .fillMaxWidth(fraction = 0.9f)
         ) {
-            Text(
-                quiz.title,
-                color = Color.White,
-                fontFamily = Lexend,
-                fontWeight = FontWeight.Bold
-            )
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                Text(
+                    quiz.title,
+                    color = Color.White,
+                    fontFamily = Lexend,
+                    fontWeight = FontWeight.Bold
+                )
+
+                Box {
+                    IconButton(
+                        modifier = Modifier.size(24.dp),
+                        onClick = {
+                            expanded = true
+                        }
+                    ) {
+                        Icon(
+                            painter = painterResource(R.drawable.more),
+                            contentDescription = "More Icon",
+                            tint = Color.White
+                        )
+                    }
+                    // DropDownMenu
+                    DropDownMenuQuiz(
+                        expanded = expanded,
+                        onDismissRequest = { expanded = false },
+                        showDeleteQuiz = {
+                            showDeleteQuiz.invoke(quiz)
+                            expanded = false
+                        }
+                    )
+                }
+            }
 
             Spacer(modifier = Modifier.height(2.dp))
 
@@ -222,5 +291,146 @@ fun MyQuizItem(
                 modifier = Modifier.size(16.dp)
             )
         }
+    }
+}
+
+@Composable
+fun DropDownMenuQuiz(
+    expanded: Boolean = false,
+    onDismissRequest: () -> Unit = {},
+    showDeleteQuiz: () -> Unit = {}
+) {
+    DropdownMenu(
+        expanded = expanded,
+        onDismissRequest = onDismissRequest
+    ) {
+
+        DropdownMenuItem(
+            text = { Text("Edit") },
+            onClick = { }
+        )
+
+        DropdownMenuItem(
+            text = { Text("Delete") },
+            onClick = { showDeleteQuiz.invoke() }
+        )
+
+    }
+}
+
+@Composable
+fun DeleteCard(
+    quizTitle: String,
+    deleteQuiz: () -> Unit ,
+    closeCard: () -> Unit
+) {
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(Color.Black.copy(alpha = 0.6f)),
+        contentAlignment = Alignment.Center
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth(fraction = 0.9f)
+                .background(
+                    ColorPalette.bgDeleteCard,
+                    shape = RoundedCornerShape(8.dp)
+                )
+                .padding(20.dp),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+
+            Text(
+                "Delete Quiz",
+                color = Color.White,
+                fontSize = 24.sp,
+                fontWeight = FontWeight.Bold,
+                fontFamily = Lexend
+            )
+
+            Spacer(modifier = Modifier.height(10.dp))
+
+            Text(modifier = Modifier.fillMaxWidth(fraction = 0.95f),
+                text = """Are you sure you want to delete "$quizTitle"? This action cannot be undone.
+                """.trimMargin(),
+                color = Color.Gray,
+                fontSize = 16.sp,
+                fontWeight = FontWeight.Normal,
+                fontFamily = Lexend,
+                textAlign = TextAlign.Center
+            )
+
+            Spacer(modifier = Modifier.height(10.dp))
+
+            LastButtons(
+                deleteQuiz = {
+                    deleteQuiz.invoke()
+                },
+                closeCard = {
+                    closeCard.invoke()
+                }
+            )
+        }
+    }
+}
+
+@Composable
+fun LastButtons(
+    deleteQuiz: () -> Unit = {},
+    closeCard: () -> Unit = {}
+) {
+
+    Button(
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(70.dp)
+            .padding(vertical = 8.dp),
+        colors = ButtonDefaults.buttonColors(
+            containerColor = ColorPalette.deleteButtonColor
+        ),
+        onClick = {
+            deleteQuiz.invoke()
+        },
+        shape = RoundedCornerShape(8.dp)
+    ) {
+
+        Text(
+            "Yes, Delete",
+            style = MaterialTheme.typography.labelLarge
+                .copy(
+                    color = Color.White,
+                    fontWeight = FontWeight.Bold,
+                    fontFamily = Lexend,
+                    fontSize = 18.sp
+                )
+        )
+    }
+
+    Button(
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(70.dp)
+            .padding(vertical = 8.dp),
+        colors = ButtonDefaults.buttonColors(
+            containerColor = ColorPalette.cancelButtonColor
+        ),
+        onClick = {
+            closeCard.invoke()
+        },
+        shape = RoundedCornerShape(8.dp)
+    ) {
+
+
+        Text(
+            "Cancel",
+            style = MaterialTheme.typography.labelLarge
+                .copy(
+                    color = Color.White,
+                    fontWeight = FontWeight.Bold,
+                    fontFamily = Lexend,
+                    fontSize = 18.sp
+                )
+        )
     }
 }

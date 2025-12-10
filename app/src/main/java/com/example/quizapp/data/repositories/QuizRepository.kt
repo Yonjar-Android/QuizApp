@@ -44,6 +44,17 @@ class QuizRepository(
         )
     }
 
+    fun searchQuizzes(query: String): Flow<List<QuizModel>> =
+        quizDao.searchQuiz(query).map { list ->
+            list.map { entity ->
+                QuizModel(
+                    id = entity.id,
+                    title = entity.title,
+                    category = entity.category
+                )
+            }
+        }
+
 
     suspend fun createQuiz(
         quizEntity: QuizEntity,
@@ -77,8 +88,13 @@ class QuizRepository(
                 }
 
             }
-
             quizId
+        }
+    }
+
+    suspend fun deleteQuiz(quiz: QuizEntity): Int {
+        return database.withTransaction {
+            quizDao.deleteQuiz(quiz)
         }
     }
 }

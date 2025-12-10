@@ -16,6 +16,9 @@ interface QuizDao {
     @Query("SELECT * FROM quiz")
     fun getAllQuizzes(): Flow<List<QuizEntity>>
 
+    @Query("SELECT * FROM quiz WHERE title LIKE '%' || :query || '%'")
+    fun searchQuiz(query: String): Flow<List<QuizEntity>>
+
     @Transaction
     @Query("SELECT * FROM quiz WHERE id = :quizId")
     suspend fun getQuizWithQuestions(quizId: Long): QuizWithQuestions
@@ -27,6 +30,6 @@ interface QuizDao {
     suspend fun updateQuiz(quiz: QuizEntity)
 
     @Delete
-    suspend fun deleteQuiz(quiz: QuizEntity)
+    suspend fun deleteQuiz(quiz: QuizEntity): Int
 
 }

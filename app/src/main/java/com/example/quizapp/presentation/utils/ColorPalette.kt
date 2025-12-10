@@ -14,4 +14,9 @@ object ColorPalette{
     val borderTextField = Color(0XFF354C40)
     val bgTextField = Color(0XFF1C2721)
     val bgTextField2 = Color(0XFF102219)
+
+
+    val bgDeleteCard = Color(0XFF27272A)
+    val deleteButtonColor = Color(0XFFF24949)
+    val cancelButtonColor = Color(0XFF3F3F46)
 }
