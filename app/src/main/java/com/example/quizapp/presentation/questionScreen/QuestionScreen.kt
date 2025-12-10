@@ -15,7 +15,9 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
@@ -45,6 +47,10 @@ import com.example.quizapp.presentation.classes.OptionModel
 import com.example.quizapp.presentation.utils.ColorPalette
 import com.example.quizapp.ui.theme.Lexend
 import org.koin.androidx.compose.koinViewModel
+import kotlin.concurrent.timer
+import kotlin.concurrent.timerTask
+import kotlin.system.measureTimeMillis
+import kotlin.time.measureTime
 
 @Composable
 fun QuestionScreen(
@@ -58,6 +64,7 @@ fun QuestionScreen(
             controller.navigateUp()
         } else {
             viewModel.loadQuestions(quizId)
+            viewModel.startTimer()
         }
     }
 
@@ -70,6 +77,7 @@ fun QuestionScreen(
     Column(
         modifier = Modifier
             .fillMaxSize()
+            .verticalScroll(rememberScrollState())
             .background(ColorPalette.bgDark),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
@@ -143,12 +151,23 @@ fun QuestionScreen(
             Button(
                 modifier = Modifier
                     .fillMaxWidth()
+                    .height(80.dp)
                     .padding(vertical = 8.dp),
                 colors = ButtonDefaults.buttonColors(
                     containerColor = ColorPalette.primaryGreen
                 ),
                 onClick = {
-                    viewModel.nextQuestion()
+
+                    if (currentIndex == quiz?.questions?.size?.minus(1)) {
+                        val finalTime = viewModel.stopTimer()
+
+                        controller.navigate(
+                            "finalScreen/${viewModel.sumOfCorrectAnswers()}/${quiz?.questions?.size}/${quiz?.id}/$finalTime"
+                        )
+                    } else {
+                        viewModel.nextQuestion()
+                    }
+
                 },
                 shape = RoundedCornerShape(8.dp)
             ) {
@@ -166,7 +185,7 @@ fun QuestionScreen(
                             color = Color.Black,
                             fontWeight = FontWeight.Bold,
                             fontFamily = Lexend,
-                            fontSize = 20.sp
+                            fontSize = 18.sp
                         )
                 )
             }

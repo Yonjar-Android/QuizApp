@@ -35,6 +35,7 @@ import androidx.navigation.navArgument
 import com.example.quizapp.presentation.createQuiz.CreateQuizScreen
 import com.example.quizapp.presentation.firstScreen.FirstScreen
 import com.example.quizapp.presentation.myQuizzes.MyQuizzesScreen
+import com.example.quizapp.presentation.questionScreen.FinalScreen
 import com.example.quizapp.presentation.questionScreen.QuestionScreen
 import com.example.quizapp.presentation.quizzes.QuizzesScreen
 import com.example.quizapp.presentation.utils.ColorPalette
@@ -45,11 +46,11 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContent {
+
             val context = LocalContext.current
             val navController = rememberNavController()
             val navBackStackEntry by navController.currentBackStackEntryAsState()
             val currentRoute = navBackStackEntry?.destination?.route
-
 
             QuizAppTheme {
                 Scaffold(
@@ -100,7 +101,41 @@ class MainActivity : ComponentActivity() {
                             )
                         }
 
+                        composable(
+                            route = "${NavigationItem.FINAL_SCREEN.route}/{totalCorrectAnswers}/{totalQuestions}/{quizId}/{time}",
+                            arguments = listOf(
+                                navArgument("totalCorrectAnswers", builder = {
+                                    type = NavType.IntType
+                                }),
+                                navArgument("totalQuestions", builder = {
+                                    type = NavType.IntType
+                                }),
+                                navArgument("quizId", builder = {
+                                    type = NavType.LongType
+                                }),
+                                navArgument("time", builder = {
+                                    type = NavType.LongType
+                                })
+                            )
+                        ) { backStackEntry ->
 
+                            val totalCorrectAnswers =
+                                backStackEntry.arguments?.getInt("totalCorrectAnswers") ?: 0
+                            val totalQuestions =
+                                backStackEntry.arguments?.getInt("totalQuestions") ?: 0
+                            val quizId = backStackEntry.arguments?.getLong("quizId") ?: 0L
+
+                            val finalTime = backStackEntry.arguments?.getLong("time") ?: 0L
+
+
+                            FinalScreen(
+                                controller = navController,
+                                quizId = quizId,
+                                totalCorrectAnswers = totalCorrectAnswers,
+                                totalQuestions = totalQuestions,
+                                time = finalTime
+                            )
+                        }
                     }
                     BackHandler {
 
@@ -135,7 +170,13 @@ fun BottomNavigation(controller: NavHostController) {
                     selected = it == navigationSelected,
                     onClick = {
                         navigationSelected = it
-                        controller.navigate(it.route)
+                        controller.navigate(it.route) {
+                            popUpTo(controller.graph.startDestinationId) {
+                                saveState = true
+                            }
+                            launchSingleTop = true
+                            restoreState = true
+                        }
                     },
                     icon = {
                         it.icon?.let { icon ->

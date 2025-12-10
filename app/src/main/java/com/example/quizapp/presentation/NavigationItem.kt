@@ -14,7 +14,7 @@ enum class NavigationItem(
 
     ALL_QUIZZES(title = "All Quizzes", icon = null, route = "allQuizzesScreen"),
     CREATE_QUIZ(title = "Create Quiz", icon = null, route = "createQuizScreen"),
-    QUESTION(title = "Question", icon = null, route = "questionScreen")
-
+    QUESTION(title = "Question", icon = null, route = "questionScreen"),
+    FINAL_SCREEN(title = "Final Screen", icon = null, route = "finalScreen")
 
 }

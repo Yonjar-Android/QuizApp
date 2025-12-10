@@ -49,7 +49,7 @@ class QuestionViewModel(
         return _selectedOptions.value[questionId]
     }
 
-    fun sumOfCorrectAnswers(){
+    fun sumOfCorrectAnswers(): Int {
         var correctAnswers = 0
 
         _quiz.value?.questions?.forEach { question ->
@@ -60,6 +60,21 @@ class QuestionViewModel(
                 correctAnswers++
             }
         }
+
+        return correctAnswers
+    }
+
+    // Measure time functions
+
+    private var startTime = 0L
+
+    fun startTimer() {
+        startTime = System.currentTimeMillis()
+    }
+
+    fun stopTimer(): Long {
+        val endTime = System.currentTimeMillis()
+        return endTime - startTime  // duration in ms
     }
 
 }
