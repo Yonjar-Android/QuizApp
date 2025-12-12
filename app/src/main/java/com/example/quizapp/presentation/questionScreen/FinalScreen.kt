@@ -2,7 +2,6 @@ package com.example.quizapp.presentation.questionScreen
 
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -180,7 +179,7 @@ fun TopBarPart(
             }
         ) {
             Icon(
-                painter = painterResource(R.drawable.search), contentDescription = "Close Icon",
+                painter = painterResource(R.drawable.share), contentDescription = "Share Icon",
                 tint = Color.White
             )
         }
@@ -197,7 +196,6 @@ fun CircularProgressBorder(
     Box(contentAlignment = Alignment.Center, modifier = Modifier.size(size)) {
         Canvas(modifier = Modifier.size(size)) {
             val diameter = size.toPx()
-            val radius = diameter / 2f
 
             // fondo del círculo
             drawArc(

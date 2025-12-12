@@ -17,7 +17,7 @@ import com.example.quizapp.data.database.entities.QuizEntity
         QuestionEntity::class,
         OptionEntity::class
     ],
-    version = 2,
+    version = 1,
     exportSchema = false
 )
 abstract class QuizDatabase : RoomDatabase() {
@@ -33,7 +33,7 @@ abstract class QuizDatabase : RoomDatabase() {
                 QuizDatabase::class.java,
                 "quiz_database"
             )
-                .addMigrations(Migrations.MIGRATION_1_2)
+                .createFromAsset("databases/quiz_database.db")
                 .build()
         }
     }

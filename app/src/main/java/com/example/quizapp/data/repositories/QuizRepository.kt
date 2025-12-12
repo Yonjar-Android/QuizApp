@@ -26,7 +26,8 @@ class QuizRepository(
                 QuizModel(
                     id = it.id,
                     title = it.title,
-                    category = it.category
+                    category = it.category,
+                    isDefault = it.isDefault
                 )
             }
         }
@@ -50,7 +51,8 @@ class QuizRepository(
                 QuizModel(
                     id = entity.id,
                     title = entity.title,
-                    category = entity.category
+                    category = entity.category,
+                    isDefault = entity.isDefault
                 )
             }
         }

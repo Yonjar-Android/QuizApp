@@ -11,6 +11,7 @@ fun QuizWithQuestions.toModel() = QuizModel(
     id = quiz.id,
     title = quiz.title,
     category = quiz.category,
+    isDefault = quiz.isDefault,
     questions = questions.map { it.toModel() }
 )
 

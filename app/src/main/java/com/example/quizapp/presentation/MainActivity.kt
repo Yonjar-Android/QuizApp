@@ -73,7 +73,9 @@ class MainActivity : ComponentActivity() {
                         }
 
                         composable(NavigationItem.ALL_QUIZZES.route) {
-                            QuizzesScreen()
+                            QuizzesScreen(
+                                controller = navController
+                            )
                         }
 
                         composable(route = NavigationItem.CREATE_QUIZ.route) {
@@ -152,8 +154,6 @@ fun BottomNavigation(controller: NavHostController) {
     val navigationList = listOf<NavigationItem>(
         NavigationItem.HOME,
         NavigationItem.QUIZZES,
-        NavigationItem.LEADERBOARD,
-        NavigationItem.PROFILE
     )
 
     var navigationSelected by remember {

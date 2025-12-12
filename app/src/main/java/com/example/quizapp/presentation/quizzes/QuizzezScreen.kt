@@ -15,6 +15,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
@@ -38,17 +39,39 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.navigation.NavHostController
 import com.example.quizapp.R
+import com.example.quizapp.presentation.NavigationItem
+import com.example.quizapp.presentation.classes.QuizModel
+import com.example.quizapp.presentation.myQuizzes.DropDownMenuQuiz
 import com.example.quizapp.presentation.utils.ColorPalette
 import com.example.quizapp.ui.theme.Lexend
-
-@Preview
+import org.koin.androidx.compose.koinViewModel
 
 @Composable
-fun QuizzesScreen() {
+fun QuizzesScreen(
+    viewModel: QuizzesViewModel = koinViewModel(),
+    controller: NavHostController
+) {
+
+    val quizzes by viewModel.quizzes.collectAsStateWithLifecycle()
+
+    var selectedTab by remember { mutableIntStateOf(0) } // 0 = all, 1 = user-created, 2 = default
+
+    // Derived state for filtered quizzes
+    val filteredQuizzes = remember(quizzes, selectedTab) {
+        when (selectedTab) {
+            1 -> quizzes.filter { !it.isDefault }
+            2 -> quizzes.filter { it.isDefault }
+            else -> quizzes
+        }
+    }
 
     Box(
         modifier = Modifier.fillMaxSize()
@@ -63,7 +86,8 @@ fun QuizzesScreen() {
                 modifier = Modifier
                     .fillMaxWidth(fraction = .94f)
             ) {
-                TopBarIcons()
+
+                Spacer(modifier = Modifier.height(20.dp))
 
                 Row(
                     modifier = Modifier.fillMaxWidth()
@@ -76,13 +100,24 @@ fun QuizzesScreen() {
 
                 Spacer(modifier = Modifier.height(10.dp))
 
-                TabNavigation()
+                TabNavigation(
+                    filterQuizzes = { index ->
+                        selectedTab = index
+                    }
+                )
 
                 Spacer(modifier = Modifier.height(20.dp))
 
                 LazyColumn {
-                    items(10) {
-                        QuizItem()
+                    items(filteredQuizzes) {
+
+                        QuizItem(
+                            it,
+                            navigateToQuiz = { quizId ->
+                                controller.navigate("${NavigationItem.QUESTION.route}/$quizId")
+                            })
+
+
                         Spacer(modifier = Modifier.height(20.dp))
                     }
                 }
@@ -110,35 +145,9 @@ fun QuizzesScreen() {
 }
 
 @Composable
-fun TopBarIcons() {
-
-    var search by remember { mutableStateOf("") }
-
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(vertical = 4.dp),
-        horizontalArrangement = Arrangement.End,
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-
-        IconButton(
-            onClick = {
-
-            }
-        ) {
-            Icon(
-                painter = painterResource(R.drawable.search),
-                contentDescription = "Settings icon",
-                modifier = Modifier.size(20.dp),
-                tint = Color.White
-            )
-        }
-    }
-}
-
-@Composable
-fun TabNavigation() {
+fun TabNavigation(
+    filterQuizzes: (Int) -> Unit
+) {
 
     val tabs = listOf<String>("All", "My Quizzes", "Default")
 
@@ -169,6 +178,7 @@ fun TabNavigation() {
                 selected = isSelected,
                 onClick = {
                     selectedTab.intValue = index
+                    filterQuizzes.invoke(index)
                 },
                 text = {
                     Text(
@@ -184,7 +194,10 @@ fun TabNavigation() {
 }
 
 @Composable
-fun QuizItem() {
+fun QuizItem(
+    quizModel: QuizModel,
+    navigateToQuiz: (Long) -> Unit = {}
+) {
     Row(
         Modifier
             .fillMaxWidth()
@@ -197,21 +210,23 @@ fun QuizItem() {
         Column(
             modifier = Modifier
                 .weight(2f)
-                .padding(16.dp)
+                .padding(horizontal = 16.dp, vertical = 12.dp)
         ) {
             Text(
-                "Geography", color = ColorPalette.primaryGreen,
+                quizModel.category, color = ColorPalette.primaryGreen,
                 fontFamily = Lexend,
-                fontWeight = FontWeight.Normal
+                fontWeight = FontWeight.Normal,
+                fontSize = 14.sp
             )
 
             Spacer(modifier = Modifier.height(2.dp))
 
             Text(
-                "World Capitals",
+                quizModel.title,
                 color = Color.White,
                 fontFamily = Lexend,
-                fontWeight = FontWeight.Bold
+                fontWeight = FontWeight.Bold,
+                fontSize = 16.sp
             )
 
             Spacer(modifier = Modifier.height(2.dp))
@@ -220,26 +235,33 @@ fun QuizItem() {
                 "10 Questions ° 5 min",
                 color = Color.Gray,
                 fontFamily = Lexend,
-                fontWeight = FontWeight.Normal
+                fontWeight = FontWeight.Normal,
+                fontSize = 14.sp
             )
 
             Spacer(modifier = Modifier.height(8.dp))
 
             Button(
-                onClick = {},
+                modifier = Modifier,
+                onClick = {
+                    navigateToQuiz.invoke(quizModel.id)
+                },
                 colors = ButtonDefaults.buttonColors(
                     containerColor = ColorPalette.greenButton
                 )
             ) {
                 Row(
-                    modifier = Modifier,
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
+                    modifier = Modifier.fillMaxHeight(),
+                    verticalAlignment = Alignment.CenterVertically,
+
+                    ) {
                     Text(
-                        "Start",
+                        modifier = Modifier,
+                        text = "Start",
                         color = ColorPalette.primaryGreen,
                         fontFamily = Lexend,
                         fontWeight = FontWeight.SemiBold,
+                        textAlign = TextAlign.Center,
                         fontSize = 14.sp
                     )
 
@@ -255,17 +277,23 @@ fun QuizItem() {
             }
         }
 
-            Image(
-                modifier = Modifier
-                    .weight(1.3f)
-                    .padding(16.dp)
-                    .clip(RoundedCornerShape(8.dp))
-                    ,
-                painter = painterResource(R.drawable.roma),
-                contentDescription = "World Map",
-                contentScale = ContentScale.Crop
-            )
+        val image = when (quizModel.title) {
+            "World Capitals" -> R.drawable.roma
+            "Pokémon Basics" -> R.drawable.pokemon
+            "Football Trivia" -> R.drawable.futbol
+            else -> {
+                R.drawable.quiz
+            }
+        }
 
-
+        Image(
+            modifier = Modifier
+                .weight(1.3f)
+                .padding(16.dp)
+                .clip(RoundedCornerShape(8.dp)),
+            painter = painterResource(image),
+            contentDescription = "World Map",
+            contentScale = ContentScale.Crop
+        )
     }
 }
