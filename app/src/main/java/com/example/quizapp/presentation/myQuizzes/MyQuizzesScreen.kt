@@ -151,6 +151,9 @@ fun MyQuizzesScreen(
                             showDeleteQuiz = { quizToDelete ->
                                 quizModel = quizToDelete
                                 deleteQuiz = true
+                            },
+                            navigateToEdit = {
+                                controller.navigate("${NavigationItem.CREATE_QUIZ.route}/${quizInfo.id}")
                             }
                         )
                         Spacer(modifier = Modifier.height(20.dp))
@@ -203,7 +206,8 @@ fun MyQuizzesScreen(
 fun MyQuizItem(
     quiz: QuizModel,
     navigateToQuiz: (Long) -> Unit,
-    showDeleteQuiz: (QuizModel) -> Unit = {}
+    showDeleteQuiz: (QuizModel) -> Unit = {},
+    navigateToEdit: () -> Unit = {}
 ) {
 
     var expanded by remember { mutableStateOf(false) }
@@ -254,6 +258,10 @@ fun MyQuizItem(
                         showDeleteQuiz = {
                             showDeleteQuiz.invoke(quiz)
                             expanded = false
+                        },
+                        navigateToEdit = {
+                            navigateToEdit.invoke()
+                            expanded = false
                         }
                     )
                 }
@@ -262,7 +270,7 @@ fun MyQuizItem(
             Spacer(modifier = Modifier.height(2.dp))
 
             Text(
-                "10 Questions ° 5 min",
+                "${quiz.questionCount} Questions ° 3 min",
                 color = Color.Gray,
                 fontFamily = Lexend,
                 fontWeight = FontWeight.Normal
@@ -298,7 +306,8 @@ fun MyQuizItem(
 fun DropDownMenuQuiz(
     expanded: Boolean = false,
     onDismissRequest: () -> Unit = {},
-    showDeleteQuiz: () -> Unit = {}
+    showDeleteQuiz: () -> Unit = {},
+    navigateToEdit: () -> Unit = {}
 ) {
     DropdownMenu(
         expanded = expanded,
@@ -307,7 +316,7 @@ fun DropDownMenuQuiz(
 
         DropdownMenuItem(
             text = { Text("Edit") },
-            onClick = { }
+            onClick = { navigateToEdit.invoke() }
         )
 
         DropdownMenuItem(

@@ -5,5 +5,6 @@ data class QuizModel(
     val title: String,
     val category: String,
     val isDefault: Boolean = false,
+    val questionCount: Int = 0,
     val questions: List<QuestionModel> = emptyList()
 )

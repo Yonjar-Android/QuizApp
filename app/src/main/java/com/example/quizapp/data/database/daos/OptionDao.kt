@@ -17,6 +17,9 @@ interface OptionDao {
     @Insert
     suspend fun insertOption(option: OptionEntity): Long
 
+    @Insert
+    suspend fun insertOptions(options: List<OptionEntity>)
+
     @Update
     suspend fun updateOption(option: OptionEntity)
 

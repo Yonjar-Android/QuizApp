@@ -62,17 +62,6 @@ fun QuizzesScreen(
 
     val quizzes by viewModel.quizzes.collectAsStateWithLifecycle()
 
-    var selectedTab by remember { mutableIntStateOf(0) } // 0 = all, 1 = user-created, 2 = default
-
-    // Derived state for filtered quizzes
-    val filteredQuizzes = remember(quizzes, selectedTab) {
-        when (selectedTab) {
-            1 -> quizzes.filter { !it.isDefault }
-            2 -> quizzes.filter { it.isDefault }
-            else -> quizzes
-        }
-    }
-
     Box(
         modifier = Modifier.fillMaxSize()
     ) {
@@ -102,14 +91,18 @@ fun QuizzesScreen(
 
                 TabNavigation(
                     filterQuizzes = { index ->
-                        selectedTab = index
+                        when (index) {
+                            1 -> viewModel.setFilter(QuizFilter.USER)
+                            2 -> viewModel.setFilter(QuizFilter.DEFAULT)
+                            else -> viewModel.setFilter(QuizFilter.ALL)
+                        }
                     }
                 )
 
                 Spacer(modifier = Modifier.height(20.dp))
 
                 LazyColumn {
-                    items(filteredQuizzes) {
+                    items(quizzes) {
 
                         QuizItem(
                             it,
@@ -232,7 +225,7 @@ fun QuizItem(
             Spacer(modifier = Modifier.height(2.dp))
 
             Text(
-                "10 Questions ° 5 min",
+                "${quizModel.questionCount} Questions ° 3 min",
                 color = Color.Gray,
                 fontFamily = Lexend,
                 fontWeight = FontWeight.Normal,

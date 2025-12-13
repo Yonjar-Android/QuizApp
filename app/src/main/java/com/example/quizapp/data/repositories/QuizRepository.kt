@@ -21,13 +21,14 @@ class QuizRepository(
     private val optionDao: OptionDao
 ) {
     fun getAllQuizzes(): Flow<List<QuizModel>> {
-        return quizDao.getAllQuizzes().map { it ->
+        return quizDao.getAllQuizzesWithQuestionCount().map { it ->
             it.map {
                 QuizModel(
-                    id = it.id,
-                    title = it.title,
-                    category = it.category,
-                    isDefault = it.isDefault
+                    id = it.quiz.id,
+                    title = it.quiz.title,
+                    category = it.quiz.category,
+                    isDefault = it.quiz.isDefault,
+                    questionCount = it.questionCount
                 )
             }
         }
@@ -35,6 +36,7 @@ class QuizRepository(
 
     suspend fun getQuizById(quizId: Long): QuizModel {
         val response = quizDao.getQuizWithQuestions(quizId)
+        println(response)
         return QuizModel(
             id = response.quiz.id,
             title = response.quiz.title,
@@ -46,13 +48,14 @@ class QuizRepository(
     }
 
     fun searchQuizzes(query: String): Flow<List<QuizModel>> =
-        quizDao.searchQuiz(query).map { list ->
+        quizDao.searchQuizWithQuestionCount(query).map { list ->
             list.map { entity ->
                 QuizModel(
-                    id = entity.id,
-                    title = entity.title,
-                    category = entity.category,
-                    isDefault = entity.isDefault
+                    id = entity.quiz.id,
+                    title = entity.quiz.title,
+                    category = entity.quiz.category,
+                    isDefault = entity.quiz.isDefault,
+                    questionCount = entity.questionCount
                 )
             }
         }
@@ -91,6 +94,56 @@ class QuizRepository(
 
             }
             quizId
+        }
+    }
+
+    suspend fun updateQuiz(
+        quizEntity: QuizEntity,
+        question: List<QuestionModel>,
+        originalIdQuestions: List<Long>
+    ){
+        database.withTransaction {
+            // Update quiz entity
+            quizDao.updateQuiz(quizEntity)
+
+            // Insert or update questions
+            question.forEach { q ->
+                if (q.id == 0L) {
+                    // New question → insert
+                   val newQuestionId = questionDao.insertQuestion(
+                        QuestionEntity(
+                            idQuiz = q.idQuiz,
+                            question = q.question))
+
+                    optionDao.insertOptions(
+                        q.options.map {
+                            OptionEntity(
+                                idQuestion = newQuestionId,
+                                answer = it.answer,
+                                isCorrect = it.isCorrect
+                            )
+                        }
+                    )
+                } else {
+                    // Existing question → update
+                    questionDao.updateQuestion(
+                        QuestionEntity(
+                            id = q.id,
+                            idQuiz = q.idQuiz,
+                            question = q.question
+                        )
+                    )
+                }
+            }
+
+            // 3️⃣ Delete questions that are in originalIdQuestions but not in the updated list
+            val updatedIds = question.map { it.id }.filter { it != 0L }.toSet()
+            val deletedIds = originalIdQuestions.filter { it !in updatedIds }
+
+            deletedIds.forEach { id ->
+                questionDao.deleteQuestionById(id)
+            }
+
         }
     }
 

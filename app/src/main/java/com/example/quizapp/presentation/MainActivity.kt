@@ -78,10 +78,26 @@ class MainActivity : ComponentActivity() {
                             )
                         }
 
-                        composable(route = NavigationItem.CREATE_QUIZ.route) {
+                        composable(route = NavigationItem.CREATE_QUIZ.route,
+                        ) {
                             CreateQuizScreen(
                                 controller = navController,
-                                mainContext = context
+                                mainContext = context,
+                            )
+                        }
+
+                        composable(route = "${NavigationItem.CREATE_QUIZ.route}/{quizId}",
+                            arguments = listOf(navArgument("quizId", builder = {
+                                type = NavType.LongType
+                            }))
+                        ) { navBackStackEntry ->
+
+                            val quizId = navBackStackEntry.arguments?.getLong("quizId")
+
+                            CreateQuizScreen(
+                                controller = navController,
+                                mainContext = context,
+                                quizId = quizId
                             )
                         }
 

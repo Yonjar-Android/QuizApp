@@ -30,6 +30,7 @@ import androidx.compose.material3.TextButton
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
@@ -56,7 +57,8 @@ import org.koin.androidx.compose.koinViewModel
 fun CreateQuizScreen(
     mainContext: Context,
     controller: NavHostController,
-    viewModel: CreateQuizViewModel = koinViewModel()
+    viewModel: CreateQuizViewModel = koinViewModel(),
+    quizId: Long? = null
 ) {
 
     var title by remember { mutableStateOf("") }
@@ -65,7 +67,9 @@ fun CreateQuizScreen(
 
     val message by viewModel.message.collectAsStateWithLifecycle()
 
-    var questions = remember { mutableStateListOf<QuestionModel>() }
+    val quizToEdit by viewModel.quiz.collectAsStateWithLifecycle()
+
+    val questions = remember { mutableStateListOf<QuestionModel>() }
 
     if (message.isNotEmpty()) {
         Toast.makeText(mainContext, message, Toast.LENGTH_SHORT).show()
@@ -73,6 +77,22 @@ fun CreateQuizScreen(
         if (message == "Quiz created successfully") {
             viewModel.resetMessage()
             controller.navigateUp()
+        }
+    }
+
+    LaunchedEffect(quizId) {
+        if (quizId != null) {
+            viewModel.loadQuizByiD(quizId)
+        }
+    }
+
+    LaunchedEffect(quizToEdit) {
+        quizToEdit?.let { quiz ->
+            title = quiz.title
+            category = quiz.category
+
+            questions.clear()
+            questions.addAll(quiz.questions)
         }
     }
 
@@ -90,6 +110,7 @@ fun CreateQuizScreen(
                 TopBarIcons(
                     controller,
                     createQuiz = {
+
                         viewModel.createQuiz(
                             QuizEntity(
                                 title = title,
