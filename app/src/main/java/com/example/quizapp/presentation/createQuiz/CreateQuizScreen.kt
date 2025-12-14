@@ -212,9 +212,13 @@ fun CreateQuizScreen(
                 Spacer(modifier = Modifier.height(15.dp))
 
                 LazyColumn {
-                    itemsIndexed(questions) { i, q ->
+                    itemsIndexed(
+                        questions,
+                        key = { _, question -> question.uiId }
+                    ) { i, q ->
 
                         QuestionItem(
+                            modifier = Modifier.animateItem(),
                             questionInfo = q,
 
                             onQuestionChanged = { newText ->
@@ -348,6 +352,7 @@ fun TopBarIcons(
 
 @Composable
 fun QuestionItem(
+    modifier: Modifier,
     questionInfo: QuestionModel,
     onQuestionChanged: (String) -> Unit,
     onOptionSelected: (Int) -> Unit,
@@ -356,7 +361,7 @@ fun QuestionItem(
 ) {
 
     Column(
-        modifier = Modifier
+        modifier = modifier
             .fillMaxWidth()
             .background(
                 ColorPalette.bgTextField,

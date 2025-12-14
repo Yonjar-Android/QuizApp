@@ -5,6 +5,8 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.BackHandler
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -67,7 +69,19 @@ class MainActivity : ComponentActivity() {
                 ) {
                     NavHost(
                         modifier = Modifier.padding(it),
-                        navController = navController, startDestination = NavigationItem.HOME.route
+                        navController = navController, startDestination = NavigationItem.HOME.route,
+                        enterTransition = {
+                            fadeIn()
+                        },
+                        exitTransition = {
+                            fadeOut()
+                        },
+                        popEnterTransition = {
+                            fadeIn()
+                        },
+                        popExitTransition = {
+                            fadeOut()
+                        }
                     ) {
                         composable(route = NavigationItem.HOME.route) {
                             FirstScreen(navController)
@@ -158,6 +172,7 @@ class MainActivity : ComponentActivity() {
                     }
 
                 }
+                BackHandler { }
             }
         }
     }

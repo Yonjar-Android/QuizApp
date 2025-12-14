@@ -1,5 +1,6 @@
 package com.example.quizapp.presentation.questionScreen
 
+import android.widget.Toast
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -36,6 +37,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -64,6 +66,8 @@ fun QuestionScreen(
             viewModel.startTimer()
         }
     }
+
+    val context = LocalContext.current
 
     val quiz by viewModel.quiz.collectAsStateWithLifecycle()
 
@@ -154,18 +158,30 @@ fun QuestionScreen(
                     containerColor = ColorPalette.primaryGreen
                 ),
                 onClick = {
+                    val question = quiz?.questions?.getOrNull(currentIndex) ?: return@Button
+
+                    val selectedOptionForCurrent =
+                        selectedOptions[question.id]
+
+                    if (selectedOptionForCurrent == null) {
+                        Toast
+                            .makeText(context, "Please select an answer", Toast.LENGTH_SHORT)
+                            .show()
+                        return@Button
+                    }
 
                     if (currentIndex == quiz?.questions?.size?.minus(1)) {
                         val finalTime = viewModel.stopTimer()
 
                         controller.navigate(
                             "finalScreen/${viewModel.sumOfCorrectAnswers()}/${quiz?.questions?.size}/${quiz?.id}/$finalTime"
-                        ){
+                        ) {
                             popUpTo(NavigationItem.QUESTION.route) {
                                 inclusive = true
                             }
                         }
                     } else {
+
                         viewModel.nextQuestion()
                     }
 

@@ -1,5 +1,6 @@
 package com.example.quizapp.presentation.quizzes
 
+import androidx.compose.animation.animateColorAsState
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -148,6 +149,9 @@ fun TabNavigation(
 
     val selectedTab = remember { mutableIntStateOf(0) }
 
+
+
+
     SecondaryTabRow(
         modifier = Modifier.clip(RoundedCornerShape(8.dp)),
         selectedTabIndex = selectedTab.intValue,
@@ -155,11 +159,17 @@ fun TabNavigation(
         indicator = {},
         divider = {},
     ) {
+
         tabs.forEachIndexed { index, value ->
             val isSelected = selectedTab.intValue == index
 
-            val backgroundSelect =
-                if (isSelected) ColorPalette.blueButton else ColorPalette.bgInitialCards
+            val backgroundSelect by animateColorAsState(
+                targetValue = if (isSelected)
+                    ColorPalette.blueButton
+                else
+                    ColorPalette.bgInitialCards,
+                label = "tabBackground"
+            )
 
             Tab(
                 modifier = Modifier
