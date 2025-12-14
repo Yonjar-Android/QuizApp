@@ -34,7 +34,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.blur
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
@@ -80,21 +79,6 @@ fun MyQuizzesScreen(
             ) {
 
                 Spacer(modifier = Modifier.height(20.dp))
-
-                Row(modifier = Modifier.fillMaxWidth()) {
-                    IconButton(
-                        modifier = Modifier.size(24.dp),
-                        onClick = {
-                            controller.navigateUp()
-                        }
-                    ) {
-                        Icon(
-                            painter = painterResource(R.drawable.arrow),
-                            contentDescription = "Close Icon",
-                            tint = Color.White
-                        )
-                    }
-                }
 
                 Spacer(modifier = Modifier.height(20.dp))
 

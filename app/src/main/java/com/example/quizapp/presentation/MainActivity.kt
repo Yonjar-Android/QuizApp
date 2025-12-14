@@ -57,7 +57,8 @@ class MainActivity : ComponentActivity() {
                     bottomBar = {
                         val showBottomBar = currentRoute in listOf(
                             NavigationItem.HOME.route,
-                            NavigationItem.ALL_QUIZZES.route
+                            NavigationItem.ALL_QUIZZES.route,
+                            NavigationItem.QUIZZES.route
                         )
                         if (showBottomBar) {
                             BottomNavigation(navController)
@@ -155,9 +156,7 @@ class MainActivity : ComponentActivity() {
                             )
                         }
                     }
-                    BackHandler {
 
-                    }
                 }
             }
         }
@@ -172,9 +171,16 @@ fun BottomNavigation(controller: NavHostController) {
         NavigationItem.QUIZZES,
     )
 
-    var navigationSelected by remember {
-        mutableStateOf(NavigationItem.HOME)
+    val navBackStackEntry by controller.currentBackStackEntryAsState()
+    val currentRoute = navBackStackEntry?.destination?.route
+
+    val selectedItem = when (currentRoute) {
+        NavigationItem.HOME.route -> NavigationItem.HOME
+        NavigationItem.ALL_QUIZZES.route -> NavigationItem.HOME
+        NavigationItem.QUIZZES.route -> NavigationItem.QUIZZES
+        else -> null
     }
+
     Column {
         HorizontalDivider()
 
@@ -183,9 +189,8 @@ fun BottomNavigation(controller: NavHostController) {
         ) {
             navigationList.forEach {
                 NavigationBarItem(
-                    selected = it == navigationSelected,
+                    selected = it == selectedItem,
                     onClick = {
-                        navigationSelected = it
                         controller.navigate(it.route) {
                             popUpTo(controller.graph.startDestinationId) {
                                 saveState = true

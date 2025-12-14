@@ -124,7 +124,9 @@ fun QuizzesScreen(
             containerColor = ColorPalette.primaryGreen,
             shape = CircleShape,
             onClick = {
-
+                controller.navigate(
+                    NavigationItem.CREATE_QUIZ.route
+                )
             }
         ) {
             Icon(

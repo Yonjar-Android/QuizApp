@@ -120,18 +120,15 @@ fun FinalScreen(
 
                 LastButtons(
                     navigateToHome = {
-                        controller.navigate(
-                            NavigationItem.HOME.route
-                        ) {
-                            popUpTo(NavigationItem.HOME.route) {
-                                saveState = true
-                            }
-                        }
+                        controller.popBackStack(
+                            NavigationItem.HOME.route,
+                            inclusive = false
+                        )
                     },
                     navigateToRetry = {
-                        controller.navigate("questionScreen/$quizId") {
-                            popUpTo(NavigationItem.HOME.route) {
-                                saveState = true
+                        controller.navigate("questionScreen/$quizId"){
+                            popUpTo(NavigationItem.QUESTION.route) {
+                                inclusive = true
                             }
                         }
                     }

@@ -43,14 +43,11 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavHostController
 import com.example.quizapp.R
+import com.example.quizapp.presentation.NavigationItem
 import com.example.quizapp.presentation.classes.OptionModel
 import com.example.quizapp.presentation.utils.ColorPalette
 import com.example.quizapp.ui.theme.Lexend
 import org.koin.androidx.compose.koinViewModel
-import kotlin.concurrent.timer
-import kotlin.concurrent.timerTask
-import kotlin.system.measureTimeMillis
-import kotlin.time.measureTime
 
 @Composable
 fun QuestionScreen(
@@ -163,7 +160,11 @@ fun QuestionScreen(
 
                         controller.navigate(
                             "finalScreen/${viewModel.sumOfCorrectAnswers()}/${quiz?.questions?.size}/${quiz?.id}/$finalTime"
-                        )
+                        ){
+                            popUpTo(NavigationItem.QUESTION.route) {
+                                inclusive = true
+                            }
+                        }
                     } else {
                         viewModel.nextQuestion()
                     }
