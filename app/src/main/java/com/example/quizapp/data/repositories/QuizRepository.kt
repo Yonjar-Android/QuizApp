@@ -129,6 +129,16 @@ class QuizRepository(
                             question = q.question
                         )
                     )
+
+                    q.options.forEach {
+                        optionDao.updateOption(
+                            OptionEntity(
+                                id = it.id,
+                                idQuestion = q.id,
+                                answer = it.answer,
+                                isCorrect = it.isCorrect
+                            ))
+                    }
                 }
             }
 
