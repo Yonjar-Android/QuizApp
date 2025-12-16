@@ -1,5 +1,6 @@
 package com.example.quizapp.presentation.myQuizzes
 
+import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
@@ -35,6 +36,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -65,6 +67,11 @@ fun MyQuizzesScreen(
 
     var quizModel by remember { mutableStateOf<QuizModel?>(null) }
 
+
+    if (message.isNotEmpty()) {
+        Toast.makeText(LocalContext.current, message, Toast.LENGTH_SHORT).show()
+        viewModel.resetMessage()
+    }
 
     Box(modifier = Modifier.fillMaxSize()) {
         Column(
@@ -126,8 +133,11 @@ fun MyQuizzesScreen(
                 Spacer(modifier = Modifier.height(20.dp))
 
                 LazyColumn() {
-                    items(quiz) { quizInfo ->
+                    items(quiz,
+                        key = { quizInfo -> quizInfo.id }
+                    ) { quizInfo ->
                         MyQuizItem(
+                            modifier = Modifier.animateItem(),
                             quizInfo,
                             navigateToQuiz = { quizId ->
                                 controller.navigate("${NavigationItem.QUESTION.route}/$quizId")
@@ -188,6 +198,7 @@ fun MyQuizzesScreen(
 
 @Composable
 fun MyQuizItem(
+    modifier: Modifier,
     quiz: QuizModel,
     navigateToQuiz: (Long) -> Unit,
     showDeleteQuiz: (QuizModel) -> Unit = {},
@@ -197,7 +208,7 @@ fun MyQuizItem(
     var expanded by remember { mutableStateOf(false) }
 
     Column(
-        modifier = Modifier
+        modifier = modifier
             .fillMaxWidth()
             .background(
                 color = ColorPalette.bgQuizCards,
@@ -215,12 +226,25 @@ fun MyQuizItem(
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
-                Text(
-                    quiz.title,
-                    color = Color.White,
-                    fontFamily = Lexend,
-                    fontWeight = FontWeight.Bold
-                )
+
+                Column {
+                    Text(
+                        quiz.category, color = ColorPalette.primaryGreen,
+                        fontFamily = Lexend,
+                        fontWeight = FontWeight.Normal,
+                        fontSize = 14.sp
+                    )
+
+                    Spacer(modifier = Modifier.height(2.dp))
+
+                    Text(
+                        quiz.title,
+                        color = Color.White,
+                        fontFamily = Lexend,
+                        fontWeight = FontWeight.Bold
+                    )
+                }
+
 
                 Box {
                     IconButton(
@@ -314,7 +338,7 @@ fun DropDownMenuQuiz(
 @Composable
 fun DeleteCard(
     quizTitle: String,
-    deleteQuiz: () -> Unit ,
+    deleteQuiz: () -> Unit,
     closeCard: () -> Unit
 ) {
     Box(
@@ -344,7 +368,8 @@ fun DeleteCard(
 
             Spacer(modifier = Modifier.height(10.dp))
 
-            Text(modifier = Modifier.fillMaxWidth(fraction = 0.95f),
+            Text(
+                modifier = Modifier.fillMaxWidth(fraction = 0.95f),
                 text = """Are you sure you want to delete "$quizTitle"? This action cannot be undone.
                 """.trimMargin(),
                 color = Color.Gray,

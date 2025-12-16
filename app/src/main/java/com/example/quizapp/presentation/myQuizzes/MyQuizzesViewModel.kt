@@ -70,4 +70,10 @@ class MyQuizzesViewModel(
         }
 
     }
+
+    fun resetMessage(){
+        _message.value = ""
+    }
+
 }
+

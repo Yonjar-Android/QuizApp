@@ -170,9 +170,8 @@ class MainActivity : ComponentActivity() {
                             )
                         }
                     }
-
+                    BackHandler { }
                 }
-                BackHandler { }
             }
         }
     }

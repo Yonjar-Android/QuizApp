@@ -37,7 +37,7 @@ interface QuizDao {
 
     @Transaction
     @Query("SELECT * FROM quiz WHERE id = :quizId")
-    suspend fun getQuizWithQuestions(quizId: Long): QuizWithQuestions
+    fun getQuizWithQuestions(quizId: Long): Flow<QuizWithQuestions>
 
     @Insert
     suspend fun insertQuiz(quiz: QuizEntity): Long

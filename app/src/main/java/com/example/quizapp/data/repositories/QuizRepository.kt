@@ -12,6 +12,7 @@ import com.example.quizapp.data.mappers.toModel
 import com.example.quizapp.presentation.classes.QuestionModel
 import com.example.quizapp.presentation.classes.QuizModel
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.map
 
 class QuizRepository(
@@ -34,17 +35,12 @@ class QuizRepository(
         }
     }
 
-    suspend fun getQuizById(quizId: Long): QuizModel {
+    fun getQuizById(quizId: Long): Flow<QuizModel> {
         val response = quizDao.getQuizWithQuestions(quizId)
-        println(response)
-        return QuizModel(
-            id = response.quiz.id,
-            title = response.quiz.title,
-            category = response.quiz.category,
-            questions = response.questions.map {
-                it.toModel()
-            }
-        )
+
+        return response.map {
+            it.toModel()
+        }
     }
 
     fun searchQuizzes(query: String): Flow<List<QuizModel>> =

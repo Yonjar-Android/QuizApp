@@ -74,9 +74,9 @@ fun CreateQuizScreen(
     if (message.isNotEmpty()) {
         Toast.makeText(mainContext, message, Toast.LENGTH_SHORT).show()
 
-        if (message == "Quiz created successfully") {
-            viewModel.resetMessage()
+        if (message == "Quiz created successfully" || message == "Quiz updated successfully") {
             controller.navigateUp()
+            viewModel.resetMessage()
         }
     }
 
@@ -113,6 +113,7 @@ fun CreateQuizScreen(
 
                         viewModel.createQuiz(
                             QuizEntity(
+                                id = quizId ?: 0,
                                 title = title,
                                 category = category
                             ),

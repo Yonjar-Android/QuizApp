@@ -7,11 +7,12 @@ import com.example.quizapp.presentation.classes.QuizModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 
 class QuestionViewModel(
     private val quizRepository: QuizRepository
-): ViewModel() {
+) : ViewModel() {
 
     private var _quiz = MutableStateFlow<QuizModel?>(null)
     val quiz = _quiz.asStateFlow()
@@ -22,16 +23,19 @@ class QuestionViewModel(
     private val _selectedOptions = MutableStateFlow<Map<Long, Long>>(emptyMap())
     val selectedOptions: StateFlow<Map<Long, Long>> = _selectedOptions
 
-    fun loadQuestions(quizId: Long){
+    fun loadQuestions(quizId: Long) {
         viewModelScope.launch {
-           _quiz.value = quizRepository.getQuizById(quizId)
+            quizRepository.getQuizById(quizId).collectLatest { quiz ->
+                _quiz.value = quiz
+            }
             _currentIndex.value = 0
             _selectedOptions.value = emptyMap()
         }
     }
 
     fun nextQuestion() {
-        _currentIndex.value = (_currentIndex.value + 1).coerceAtMost((_quiz.value?.questions?.size ?: 1) - 1)
+        _currentIndex.value =
+            (_currentIndex.value + 1).coerceAtMost((_quiz.value?.questions?.size ?: 1) - 1)
     }
 
     fun previousQuestion() {

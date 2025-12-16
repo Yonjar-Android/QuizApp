@@ -8,6 +8,7 @@ import com.example.quizapp.presentation.classes.QuestionModel
 import com.example.quizapp.presentation.classes.QuizModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 
 
@@ -25,8 +26,9 @@ class CreateQuizViewModel(
 
     fun loadQuizByiD(quizId: Long) {
         viewModelScope.launch {
-            _quiz.value = quizRepository.getQuizById(quizId)
-            println("Quiz: ${quiz.value}")
+            quizRepository.getQuizById(quizId).collectLatest { quiz ->
+                _quiz.value = quiz
+            }
         }
     }
 
@@ -36,7 +38,6 @@ class CreateQuizViewModel(
     ) {
         getQuestionIds()
         viewModelScope.launch {
-
             if (_quiz.value != null) {
                 quizRepository.updateQuiz(quizEntity, question, questionIds)
                 _message.value = "Quiz updated successfully"
